@@ -1,2 +1,2 @@
-# flowio
-A read it later list populated by your friends
+# flowlist
+A read it sooner list populated by your friends
