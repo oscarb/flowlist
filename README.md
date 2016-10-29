@@ -18,7 +18,7 @@ How does Flowlist solve these two problems?
 
 ## Features
 
-* **Auto-archive** will put content you haven't gotten around to in a archive on a regular weekly basis. This prevents the list from [stacking up with content you will never get around to](https://zenhabits.net/simple-rules/).
+* **Auto-archive** will put content you haven't gotten around to in an archive on a regular weekly basis. This prevents the list from [stacking up with content you will never get around to](https://zenhabits.net/simple-rules/).
 
 * **Archive-on-open** archives the content directly when you open the content, so you won't have to go back and clear the list of the items you've taken care of.
 
