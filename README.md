@@ -13,7 +13,7 @@ How does Flowlist solve these two problems?
 
 * As your friends can share content directly to your Flowlist, you don't have do add it to the list yourself. You can share content with any person in your contacts who also has Flowlist.
 
-* Flowlist will label your content as either something to _watch_, _hear_ or _read_. Watching videos requires a different effort than reading articles for example, so it will be easy to go through whatever your mind is up to. Content is automatically labeled depending on the URL of the contnet, with the ability for the sharing user to override the suggested label. 
+* Flowlist will label your content as either something to _watch_, _hear_ or _read_. Watching videos requires a different effort than reading articles for example, so it will be easy to go through whatever your mind is up to. Content is automatically labeled depending on the URL of the content, with the ability for the sharing user to override the suggested label. 
 
 
 ## Features
