@@ -24,5 +24,5 @@ How does Flowlist solve these two problems?
 
 * **Time** is displayed for each item on your list, so you can see how long it will take to watch the video, listen to music or even read the articles. So you can tick of those items that can be done before the bus arrives. 
 
-* **Back-to-back playback** will be available for (YouTube) videos. So you can watch all the vidoes with just one click then sit back and relax.
+* **Back-to-back playback** will be available for (YouTube) videos. So you can watch all the videos with just one click then sit back and relax.
 
