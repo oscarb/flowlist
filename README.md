@@ -26,3 +26,5 @@ How does Flowlist solve these two problems?
 
 * **Back-to-back playback** will be available for (YouTube) videos. So you can watch all the videos with just one click then sit back and relax.
 
+* **No duplicates**, your friends will be notified when they´re trying to add content to your Flowlist that you've already seen. No more having to tell your friend they're late to the party.
+
