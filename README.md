@@ -28,3 +28,6 @@ How does Flowlist solve these two problems?
 
 * **No duplicates**, your friends will be notified when they´re trying to add content to your Flowlist that you've already seen. No more having to tell your friend they're late to the party.
 
+* **No extra password and username to remember**, Flowlist uses your phone number to identify you and your'e always logged in on your Android device.
+
+* **Flowlist web** will be available so you can see and manage your Flowlist from your desktop or any other device.
