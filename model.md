@@ -22,7 +22,7 @@ When choosing a user to send a link to, each user should appear as they do in th
 - URL
 - Title
 - Duration
-- SuggestedType
+- SuggestedType (watch, listen, read)
 
 Before any link is saved, the URL should be normalized. Duration is implemented differently for each subclass.
 
