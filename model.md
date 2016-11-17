@@ -12,6 +12,7 @@ When choosing a user to send a link to, each user should appear as they do in th
 - Timestamp
 - FromUser
 - ToUsers
+- Link
 
 ## Reaction
 - Timestamp
