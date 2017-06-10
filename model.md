@@ -27,7 +27,7 @@ When choosing a user to send a link to, each user should appear as they do in th
 - URL
 - Title
 - Description
-- Locale?
+- Locale / lang
 - Duration
 - SuggestedType (watch, listen, read)
 - Domain/SiteName
@@ -38,6 +38,7 @@ When choosing a user to send a link to, each user should appear as they do in th
 - DatePublished
 - Excerpt?
 - Tags?
+- Favicon
 
 Before any link is saved, the URL should be normalized. Duration is implemented differently for each subclass.
 
