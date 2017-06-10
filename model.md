@@ -13,6 +13,9 @@ When choosing a user to send a link to, each user should appear as they do in th
 - FromUser
 - ToUsers
 - Link
+- Favorite
+- Archived
+- State (recieved/seen/opned)
 
 ## Reaction
 - Timestamp
@@ -23,8 +26,18 @@ When choosing a user to send a link to, each user should appear as they do in th
 ## Link
 - URL
 - Title
+- Description
+- Locale?
 - Duration
 - SuggestedType (watch, listen, read)
+- Domain/SiteName
+- ResponseCode
+- MimeType
+- Content Length?
+- Encoding?
+- DatePublished
+- Excerpt?
+- Tags?
 
 Before any link is saved, the URL should be normalized. Duration is implemented differently for each subclass.
 
@@ -35,12 +48,18 @@ Before any link is saved, the URL should be normalized. Duration is implemented 
 - YouTubeId
 
 ### AudioLink
-- Artist
+- Artists
 - Title
 - Type (Album, track...)
+- ReleaseDate
 
 #### SpotifyLink
 - SpotifyId
 
 ### ArticleLink
-- Author
+- Authors
+- WordCount
+- InlineVideos
+- Images
+- 
+
