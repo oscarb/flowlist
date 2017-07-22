@@ -43,6 +43,10 @@ dependencies {
 
 def getProperties(path) {
     Properties props = new Properties()
-    props.load(new FileInputStream(file(path)))
-    return props
+    if (file(path).exists()) {
+        props.load(new FileInputStream(file(path)))
+        return props
+    } else {
+        throw new Exception("Could not find file: " + path)
+    }
 }
