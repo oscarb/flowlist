@@ -18,6 +18,9 @@ android {
             getProperties('./src/debug/server.properties').each { p ->
                 buildConfigField 'String', p.key, p.value
             }
+            getProperties('./src/debug/facebook-app.properties').each { p ->
+                resValue 'string', p.key, p.value
+            }
         }
         release {
             minifyEnabled false
