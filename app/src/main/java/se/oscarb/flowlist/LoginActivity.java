@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -66,7 +67,7 @@ public class LoginActivity extends AppCompatActivity {
         AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
                 new AccountKitConfiguration.AccountKitConfigurationBuilder(
                         LoginType.PHONE,
-                        AccountKitActivity.ResponseType.TOKEN
+                        AccountKitActivity.ResponseType.CODE
                 );
         final AccountKitConfiguration configuration = configurationBuilder.build();
 
@@ -86,9 +87,16 @@ public class LoginActivity extends AppCompatActivity {
                 // display login error
                 String toastMessage = loginResult.getError().getErrorType().getMessage();
                 Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
-            } else if (loginResult.getAccessToken() != null) {
+            } else if (loginResult.wasCancelled()) {
+                Toast.makeText(this, "Login canceled", Toast.LENGTH_LONG).show();
+            } else if (loginResult.getAuthorizationCode() != null) {
                 // on successful login, proceed to the account activity
-                launchMainActivity();
+                String authCode = loginResult.getAuthorizationCode();
+                Log.d("TAG", "Auth code " + authCode);
+
+                // TODO Run cloud code to pass auth code to server
+
+                //launchMainActivity();
             }
         }
     }
