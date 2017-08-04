@@ -1,13 +1,22 @@
 package se.oscarb.flowlist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
+
+import com.facebook.accountkit.Account;
+import com.facebook.accountkit.AccountKit;
+import com.facebook.accountkit.AccountKitCallback;
+import com.facebook.accountkit.AccountKitError;
+import com.facebook.accountkit.PhoneNumber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +35,30 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        AccountKit.getCurrentAccount(new AccountKitCallback<Account>() {
+            @Override
+            public void onSuccess(final Account account) {
+                // get Account Kit ID
+                String accountKitId = account.getId();
+                Log.d("id", "ID = " + accountKitId);
+
+
+                PhoneNumber phoneNumber = account.getPhoneNumber();
+                if (account.getPhoneNumber() != null) {
+                    // if the phone number is available, display it
+                    Log.d("TAG", "Phone" + account.getPhoneNumber().toString());
+                }
+
+            }
+
+            @Override
+            public void onError(final AccountKitError error) {
+                String toastMessage = error.getErrorType().getMessage();
+                Toast.makeText(MainActivity.this, toastMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
     }
 
     @Override
@@ -43,10 +76,18 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_log_out) {
+            AccountKit.logOut();
+            launchLogInActivity();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void launchLogInActivity() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
