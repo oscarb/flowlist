@@ -3,6 +3,7 @@ package se.oscarb.flowlist;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,10 +12,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import com.facebook.accountkit.AccessToken;
+import com.facebook.accountkit.AccountKit;
+import com.facebook.accountkit.ui.AccountKitActivity;
+import com.facebook.accountkit.ui.AccountKitConfiguration;
+import com.facebook.accountkit.ui.LoginType;
+
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
+
+    public static int APP_REQUEST_CODE = 1;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -33,14 +42,42 @@ public class LoginActivity extends AppCompatActivity {
         verifyPhoneLogin.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                onPhoneLogin();
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        // check for an existing access token
+        AccessToken accessToken = AccountKit.getCurrentAccessToken();
+        if (accessToken != null) {
+            // if previously logged in, proceed to the account activity
+            launchMainActivity();
+        }
     }
 
+    private void onPhoneLogin() {
+        Intent intent = new Intent(this, AccountKitActivity.class);
+
+        // configure login type and response type
+        AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
+                new AccountKitConfiguration.AccountKitConfigurationBuilder(
+                        LoginType.PHONE,
+                        AccountKitActivity.ResponseType.TOKEN
+                );
+        final AccountKitConfiguration configuration = configurationBuilder.build();
+
+        // launch the Account Kit activity
+        intent.putExtra(AccountKitActivity.ACCOUNT_KIT_ACTIVITY_CONFIGURATION, configuration);
+        startActivityForResult(intent, APP_REQUEST_CODE);
+    }
+
+    private void launchMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
     /**
      * Attempts to sign in or register the account specified by the login form.
