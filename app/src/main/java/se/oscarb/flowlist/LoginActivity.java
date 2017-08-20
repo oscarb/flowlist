@@ -2,10 +2,7 @@ package se.oscarb.flowlist;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,10 +11,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.facebook.accountkit.AccessToken;
-import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitLoginResult;
-import com.facebook.accountkit.PhoneNumber;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
@@ -29,27 +23,19 @@ import com.parse.ParseUser;
 
 import java.util.HashMap;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class LoginActivity extends AppCompatActivity {
 
     public static int APP_REQUEST_CODE = 1;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
-    private View mProgressView;
-    private View mLoginFormView;
+    private View progressView;
+    private View loginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Button verifyPhoneLogin = (Button) findViewById(R.id.verify_phone_login);
+        Button verifyPhoneLogin = (Button) findViewById(R.id.start_phone_login);
         verifyPhoneLogin.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -57,19 +43,19 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        loginFormView = findViewById(R.id.login_form);
+        progressView = findViewById(R.id.login_progress);
 
-        // check for an existing access token
-        AccessToken accessToken = AccountKit.getCurrentAccessToken();
-        if (accessToken != null) {
-            // if previously logged in, proceed to the account activity
-            launchMainActivity();
+        // Log out any existing session
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser != null) {
+            ParseUser.logOut();
         }
     }
 
     private void onPhoneLogin() {
         Intent intent = new Intent(this, AccountKitActivity.class);
+        showProgress(true);
 
         // configure login type and response type
         AccountKitConfiguration.AccountKitConfigurationBuilder configurationBuilder =
@@ -77,7 +63,6 @@ public class LoginActivity extends AppCompatActivity {
                         LoginType.PHONE,
                         AccountKitActivity.ResponseType.CODE
                 );
-        configurationBuilder.setInitialPhoneNumber(new PhoneNumber("+46", "737268250", "SE"));
         final AccountKitConfiguration configuration = configurationBuilder.build();
 
         // launch the Account Kit activity
@@ -94,51 +79,51 @@ public class LoginActivity extends AppCompatActivity {
             AccountKitLoginResult loginResult = data.getParcelableExtra(AccountKitLoginResult.RESULT_KEY);
             if (loginResult.getError() != null) {
                 // display login error
+                showProgress(false);
                 String toastMessage = loginResult.getError().getErrorType().getMessage();
                 Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
             } else if (loginResult.wasCancelled()) {
+                showProgress(false);
                 Toast.makeText(this, "Login canceled", Toast.LENGTH_LONG).show();
             } else if (loginResult.getAuthorizationCode() != null) {
-                // on successful login, proceed to the account activity
-                String authorizationCode = loginResult.getAuthorizationCode();
-                Log.d("TAG", "Authorization Code " + authorizationCode);
-
-                // TODO Run cloud code to pass auth code to server
-                HashMap<String, Object> params = new HashMap<>();
-                params.put("authorizationCode", authorizationCode);
-                ParseCloud.callFunctionInBackground("requestSessionToken", params, new FunctionCallback<String>() {
-                    @Override
-                    public void done(String sessionToken, ParseException e) {
-                        if (e == null) {
-                            Log.d("cloud", "Got back: " + sessionToken);
-                            becomeUser(sessionToken);
-                        } else {
-                            Log.d("error", e.toString());
-                        }
-                    }
-                });
-
-                //launchMainActivity();
+                // On successful login, exchange authorization code for a session token with server
+                requestSessionToken(loginResult.getAuthorizationCode());
             }
         }
     }
 
-    private void becomeUser(String sessionToken) {
-        Log.d("TAG", " ACCESS TOKEN " + sessionToken);
-
-        if (sessionToken == null) return;
-
-        ParseUser.becomeInBackground(sessionToken, new LogInCallback() {
-            public void done(ParseUser user, ParseException e) {
-                if (user != null) {
-                    // The current user is now set to user.
+    private void requestSessionToken(String authorizationCode) {
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("authorizationCode", authorizationCode);
+        ParseCloud.callFunctionInBackground("requestSessionToken", params, new FunctionCallback<String>() {
+            @Override
+            public void done(String sessionToken, ParseException e) {
+                if (e == null) {
+                    Log.d("cloud", "Got back: " + sessionToken);
+                    becomeUser(sessionToken);
                 } else {
-                    // The token could not be validated.
+                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_LONG).show();
+                    Log.d("error", e.toString());
                 }
             }
         });
     }
 
+    private void becomeUser(String sessionToken) {
+        Log.d("TAG", " ACCESS TOKEN " + sessionToken);
+        if (sessionToken == null) return;
+
+        ParseUser.becomeInBackground(sessionToken, new LogInCallback() {
+            public void done(ParseUser user, ParseException e) {
+                if (user != null) {
+                    launchMainActivity();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_LONG).show();
+                    Log.d("error", e.toString());
+                }
+            }
+        });
+    }
 
     private void launchMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
@@ -147,100 +132,29 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-        showProgress(true);
-    }
-
-    /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
+        loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        loginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
             }
+        });
 
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                // TODO error...
+        progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                progressView.setVisibility(show ? View.VISIBLE : View.GONE);
             }
-        }
+        });
 
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 }
 
