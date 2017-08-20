@@ -17,9 +17,17 @@ import android.widget.Toast;
 import com.facebook.accountkit.AccessToken;
 import com.facebook.accountkit.AccountKit;
 import com.facebook.accountkit.AccountKitLoginResult;
+import com.facebook.accountkit.PhoneNumber;
 import com.facebook.accountkit.ui.AccountKitActivity;
 import com.facebook.accountkit.ui.AccountKitConfiguration;
 import com.facebook.accountkit.ui.LoginType;
+import com.parse.FunctionCallback;
+import com.parse.LogInCallback;
+import com.parse.ParseCloud;
+import com.parse.ParseException;
+import com.parse.ParseUser;
+
+import java.util.HashMap;
 
 /**
  * A login screen that offers login via email/password.
@@ -69,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                         LoginType.PHONE,
                         AccountKitActivity.ResponseType.CODE
                 );
+        configurationBuilder.setInitialPhoneNumber(new PhoneNumber("+46", "737268250", "SE"));
         final AccountKitConfiguration configuration = configurationBuilder.build();
 
         // launch the Account Kit activity
@@ -91,16 +100,44 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Login canceled", Toast.LENGTH_LONG).show();
             } else if (loginResult.getAuthorizationCode() != null) {
                 // on successful login, proceed to the account activity
-                String authCode = loginResult.getAuthorizationCode();
-                Log.d("TAG", "Auth code " + authCode);
+                String authorizationCode = loginResult.getAuthorizationCode();
+                Log.d("TAG", "Authorization Code " + authorizationCode);
 
                 // TODO Run cloud code to pass auth code to server
+                HashMap<String, Object> params = new HashMap<>();
+                params.put("authorizationCode", authorizationCode);
+                ParseCloud.callFunctionInBackground("requestSessionToken", params, new FunctionCallback<String>() {
+                    @Override
+                    public void done(String sessionToken, ParseException e) {
+                        if (e == null) {
+                            Log.d("cloud", "Got back: " + sessionToken);
+                            becomeUser(sessionToken);
+                        } else {
+                            Log.d("error", e.toString());
+                        }
+                    }
+                });
 
                 //launchMainActivity();
             }
         }
     }
 
+    private void becomeUser(String sessionToken) {
+        Log.d("TAG", " ACCESS TOKEN " + sessionToken);
+
+        if (sessionToken == null) return;
+
+        ParseUser.becomeInBackground(sessionToken, new LogInCallback() {
+            public void done(ParseUser user, ParseException e) {
+                if (user != null) {
+                    // The current user is now set to user.
+                } else {
+                    // The token could not be validated.
+                }
+            }
+        });
+    }
 
 
     private void launchMainActivity() {
