@@ -24,12 +24,16 @@ android {
             getProperties('./src/debug/facebook-app.properties').each { p ->
                 resValue 'string', p.key, p.value
             }
+
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             getProperties('./src/main/server.properties').each { p ->
                 buildConfigField 'String', p.key, p.value
+            }
+            getProperties('./src/main/facebook-app.properties').each { p ->
+                resValue 'string', p.key, p.value
             }
 
         }
