@@ -1,0 +1,4 @@
+<resources>
+    <!-- Phone number to use for test user -->
+    <string name="test_phone_number">70123456789</string>
+</resources>
